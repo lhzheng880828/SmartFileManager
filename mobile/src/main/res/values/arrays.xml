@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- add by zyyang  -->
+<resources>
+
+    <string-array name="sort_by_items">
+        <item>GS_module_19</item>
+        <item>GS_module_2061</item>
+        <item>GS_module_2005</item>
+    </string-array>
+</resources>

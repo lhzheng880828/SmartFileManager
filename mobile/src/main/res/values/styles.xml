@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (C) 2013 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+
+<resources xmlns:android="http://schemas.android.com/apk/res/android">
+    <style name="TextAppearance" />
+
+    <style name="TextAppearance.Medium">
+        <item name="android:textAppearance">?android:attr/textAppearanceMedium</item>
+        <item name="android:textColor">?android:attr/textColorSecondary</item> 
+        <item name="android:textSize">40sp</item>
+    </style>
+
+    <style name="TextAppearance.Small">
+        <item name="android:textAppearance">?android:attr/textAppearanceSmall</item>
+        <item name="android:textColor">?android:attr/textColorTertiary</item> 
+         <item name="android:textSize">36sp</item>
+    </style>
+
+    <!-- Normally just a redirection, but this is used to make ourselves a
+         dialog on large tablets -->
+    <style name="Theme" parent="@android:style/Theme.Holo.Light">
+        <item name="android:actionOverflowButtonStyle">@style/DarkerOverflow</item>
+    </style>
+    
+    <style name="DarkerOverflow" parent="@android:style/Widget.Holo.Light.ActionButton.Overflow">
+        <item name="android:src">@drawable/ic_menu_overflow</item>
+    </style>
+
+    <style name="DialogWhenReallyLarge" parent="@style/Theme.AppCompat.DayNight"/>
+
+    <style name="DocumentsTheme" parent="@style/DialogWhenReallyLarge">
+        <item name="actionBarWidgetTheme">@null</item>
+        <item name="actionBarTheme">@style/ThemeOverlay.AppCompat.Dark.ActionBar</item>
+        <item name="actionBarPopupTheme">@style/ThemeOverlay.AppCompat.Dark</item>
+        <item name="actionModeBackground">@color/alertDarkColor</item>
+
+        <item name="colorPrimaryDark">@android:color/black</item>
+        <item name="colorPrimary">@color/material_blue_grey_800</item>
+        <item name="colorAccent">@color/accentColor</item>
+        <item name="colorControlNormal">@color/primary_text_default_material_dark</item>
+        <item name="colorControlActivated">@color/primary_text_default_material_dark</item>
+
+        <!--<item name="android:listDivider">@drawable/list_divider_material</item>-->
+
+        <item name="windowActionBar">false</item>
+        <item name="windowActionModeOverlay">true</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="*android:windowFixedWidthMajor">@null</item>
+        <item name="*android:windowFixedWidthMinor">@null</item>
+        <item name="*android:windowMinWidthMajor">@null</item>
+        <item name="*android:windowMinWidthMinor">@null</item>
+        <!--        <item name="*android:windowFixedHeightMajor">80%</item>-->
+        <!--        <item name="*android:windowFixedHeightMinor">90%</item>-->
+
+        <item name="android:windowSoftInputMode">stateUnspecified|adjustUnspecified</item>
+
+        <!-- android transitions -->
+        <item name="*android:windowContentTransitions">true</item>
+        <item name="*android:windowAllowEnterTransitionOverlap">true</item>
+        <item name="*android:windowAllowReturnTransitionOverlap">true</item>
+
+        <item name="actionModeStyle">@style/Custom.Widget.ActionMode</item>
+        <item name="actionModeCloseButtonStyle">@style/Custom.Widget.ActionButton.CloseMode</item>
+    </style>
+
+    <style name="Custom.Widget.ActionMode" parent="Widget.AppCompat.ActionMode">
+        <item name="android:paddingLeft">@dimen/toolbar_h_padding</item>
+        <item name="android:paddingRight">@dimen/toolbar_h_padding</item>
+    </style>
+
+    <style name="Custom.Widget.ActionButton.CloseMode" parent="Widget.AppCompat.ActionButton.CloseMode">
+        <item name="android:layout_marginRight">20dp</item>
+        <item name="android:minWidth">48dp</item>
+    </style>
+
+    <style name="AppTheme" parent="Theme.AppCompat.Light"/>
+
+
+
+    <style name="PopupTheme" parent="@android:style/Widget.Holo.Spinner">
+        <item name="android:background">@drawable/abc_spinner_mtrl_am_alpha</item>
+    </style>
+
+
+    <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar"/>
+    <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light"/>
+    <style name="AppTheme.NoActionBar" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+        <item name="windowActionModeOverlay">true</item>
+    </style>
+
+    <style name="TranslucentTheme" parent="AppTheme.NoActionBar">
+    </style>
+
+    <style name="Theme.Splash" parent="@style/DocumentsTheme">
+        <item name="windowNoTitle">true</item>
+        <item name="android:windowContentOverlay">@null</item>
+        <item name="android:windowBackground">@drawable/splash_background</item>
+    </style>
+
+    <style name="ButtonAppTheme" parent="@style/Widget.AppCompat.Button.Borderless.Colored">
+        <item name="android:gravity">center_vertical</item>
+        <item name="android:minHeight">48dp</item>
+        <item name="android:paddingLeft">4dp</item>
+        <item name="android:paddingRight">4dp</item>
+        <item name="android:paddingTop">4dp</item>
+        <item name="android:paddingBottom">4dp</item>
+        <item name="android:clickable">true</item>
+        <item name="android:textAllCaps">false</item>
+    </style>
+
+</resources>
