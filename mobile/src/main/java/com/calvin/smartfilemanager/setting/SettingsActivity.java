@@ -18,6 +18,8 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
     public static final String KEY_PRIMARY_COLOR = "primaryColor";
     public static final String KEY_ACCENT_COLOR = "accentColor";
     public static final String KEY_FILE_HIDDEN = "fileHidden";
+    public static final String KEY_ADVANCED_DEVICES = "advancedDevices";
+    public static final String KEY_ROOT_MODE = "rootMode";
 
 
     @Override
@@ -48,5 +50,15 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
     public static boolean getDisplayFileHidden(Context context) {
         return PreferenceManager.getDefaultSharedPreferences(context)
                 .getBoolean(KEY_FILE_HIDDEN, false);
+    }
+
+    public static boolean getDisplayAdvancedDevices(Context context) {
+        return PreferenceManager.getDefaultSharedPreferences(context)
+                .getBoolean(KEY_ADVANCED_DEVICES, true);
+    }
+
+    public static boolean getRootMode(Context context) {
+        return PreferenceManager.getDefaultSharedPreferences(context)
+                .getBoolean(KEY_ROOT_MODE, true);
     }
 }

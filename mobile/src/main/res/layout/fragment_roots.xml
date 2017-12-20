@@ -14,8 +14,11 @@
      limitations under the License.
 -->
 
-<ListView xmlns:android="http://schemas.android.com/apk/res/android"
+<ExpandableListView xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@android:id/list"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:divider="@drawable/ic_drawer_hairline_divider" />
+    android:clipToPadding="false"
+    android:divider="@null"
+    android:groupIndicator="@drawable/expander_group"
+    android:paddingTop="8dp" />

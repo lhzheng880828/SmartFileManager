@@ -22,6 +22,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ProviderInfo;
+import android.content.pm.ResolveInfo;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -63,6 +64,7 @@ import com.calvin.smartfilemanager.model.DurableUtils;
 import com.calvin.smartfilemanager.model.RootInfo;
 import com.calvin.smartfilemanager.provider.RecentsProvider;
 import com.calvin.smartfilemanager.provider.RecentsProvider.ResumeColumns;
+import com.calvin.smartfilemanager.setting.SettingsActivity;
 import com.calvin.smartfilemanager.widget.DocumentsToolBar;
 import com.google.common.collect.Maps;
 
@@ -96,6 +98,7 @@ public abstract class BaseActivity extends ActionBarActivity {
     abstract void saveStackBlocking();
     public abstract void onRootPicked(RootInfo info, RootInfo parent);
     public abstract void onRootPicked(RootInfo info, boolean closeDrawer);
+    public abstract void onAppPicked(ResolveInfo info);
 
     public BaseActivity(String tag) {
         mTag = tag;
@@ -317,6 +320,7 @@ public abstract class BaseActivity extends ActionBarActivity {
         public boolean localOnly = false;
         public boolean forceAdvanced = false;
         public boolean showAdvanced = false;
+        public boolean rootMode = false;
         public boolean stackTouched = false;
         public boolean restored = false;
         public boolean directoryCopy = false;
@@ -369,6 +373,7 @@ public abstract class BaseActivity extends ActionBarActivity {
             out.writeInt(localOnly ? 1 : 0);
             out.writeInt(forceAdvanced ? 1 : 0);
             out.writeInt(showAdvanced ? 1 : 0);
+            out.writeInt(rootMode ? 1: 0);
             out.writeInt(stackTouched ? 1 : 0);
             out.writeInt(restored ? 1 : 0);
             DurableUtils.writeToParcel(out, stack);
@@ -393,6 +398,7 @@ public abstract class BaseActivity extends ActionBarActivity {
                 state.localOnly = in.readInt() != 0;
                 state.forceAdvanced = in.readInt() != 0;
                 state.showAdvanced = in.readInt() != 0;
+                state.rootMode = in.readInt() != 0;
                 state.stackTouched = in.readInt() != 0;
                 state.restored = in.readInt() != 0;
                 DurableUtils.readFromParcel(in, state.stack);

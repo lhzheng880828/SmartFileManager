@@ -68,4 +68,6 @@
     <color name="item_connection_server">#4CAF50</color>
     <color name="item_connection_client">#00838F</color>
 
+    <color name="defaultThemeColor">#808080</color>
+
 </resources>

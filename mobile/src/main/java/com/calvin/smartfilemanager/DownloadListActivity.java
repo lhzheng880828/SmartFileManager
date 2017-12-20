@@ -17,6 +17,7 @@
 package com.calvin.smartfilemanager;
 
 import android.content.Context;
+import android.content.pm.ResolveInfo;
 import android.net.Uri;
 import android.os.Bundle;
 
@@ -105,6 +106,11 @@ public class DownloadListActivity extends BaseActivity {
 
 	@Override
 	public void again() {
+
+	}
+
+	@Override
+	public void onAppPicked(ResolveInfo info) {
 
 	}
 }

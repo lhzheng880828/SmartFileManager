@@ -21,6 +21,7 @@ import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.app.LoaderManager.LoaderCallbacks;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.Loader;
 import android.content.pm.PackageManager;
@@ -28,43 +29,52 @@ import android.content.pm.ResolveInfo;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.Settings;
+import android.support.v7.app.AlertDialog;
 import android.text.TextUtils;
 import android.text.format.Formatter;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemClickListener;
-import android.widget.AdapterView.OnItemLongClickListener;
-import android.widget.ArrayAdapter;
+import android.widget.ExpandableListAdapter;
+import android.widget.ExpandableListView;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
 import com.calvin.smartfilemanager.BaseActivity;
 import com.calvin.smartfilemanager.BaseActivity.State;
-import com.calvin.smartfilemanager.DocumentsActivity;
 import com.calvin.smartfilemanager.DocumentsApplication;
 import com.calvin.smartfilemanager.R;
-import com.calvin.smartfilemanager.misc.RootsCache;
+import com.calvin.smartfilemanager.adapter.RootsExpandableAdapter;
 import com.calvin.smartfilemanager.loader.RootsLoader;
+import com.calvin.smartfilemanager.misc.AnalyticsManager;
+import com.calvin.smartfilemanager.misc.CrashReportingManager;
+import com.calvin.smartfilemanager.misc.RootsCache;
 import com.calvin.smartfilemanager.model.DocumentInfo;
+import com.calvin.smartfilemanager.model.GroupInfo;
 import com.calvin.smartfilemanager.model.RootInfo;
-import com.google.common.collect.Lists;
+import com.calvin.smartfilemanager.provider.ExplorerProvider;
+import com.calvin.smartfilemanager.provider.ExternalStorageProvider;
+import com.calvin.smartfilemanager.setting.SettingsActivity;
 
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Comparator;
-import java.util.List;
 import java.util.Objects;
+
+import static com.calvin.smartfilemanager.BaseActivity.State.ACTION_BROWSE;
 
 /**
  * Display list of known storage backend roots.
  */
 public class RootsFragment extends Fragment {
 
-    private ListView mList;
-    private RootsAdapter mAdapter;
+    private int group_size = 0;
+    private ArrayList<Long> expandedIds = new ArrayList<>();
+
+    private ExpandableListView mList;
+    private RootsExpandableAdapter mAdapter;
 
     private LoaderCallbacks<Collection<RootInfo>> mCallbacks;
 
@@ -92,8 +102,8 @@ public class RootsFragment extends Fragment {
         final Context context = inflater.getContext();
 
         final View view = inflater.inflate(R.layout.fragment_roots, container, false);
-        mList = (ListView) view.findViewById(android.R.id.list);
-        mList.setOnItemClickListener(mItemListener);
+        mList = (ExpandableListView) view.findViewById(android.R.id.list);
+        mList.setOnChildClickListener(mItemListener);
         mList.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
 
         return view;
@@ -120,7 +130,7 @@ public class RootsFragment extends Fragment {
 
                 final Intent includeApps = getArguments().getParcelable(EXTRA_INCLUDE_APPS);
 
-                mAdapter = new RootsAdapter(context, result, includeApps);
+                mAdapter = new RootsExpandableAdapter(context, result, includeApps);
                 mList.setAdapter(mAdapter);
 
                 onCurrentRootChanged();
@@ -129,7 +139,7 @@ public class RootsFragment extends Fragment {
             @Override
             public void onLoaderReset(Loader<Collection<RootInfo>> loader) {
                 mAdapter = null;
-                mList.setAdapter(null);
+                mList.setAdapter((ExpandableListAdapter) null);
             }
         };
     }
@@ -137,7 +147,20 @@ public class RootsFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        onDisplayStateChanged();
+        final Context context = getActivity();
+        final State state = ((BaseActivity) context).getDisplayState();
+        state.showAdvanced = state.forceAdvanced
+                | SettingsActivity.getDisplayAdvancedDevices(context);
+        state.rootMode = SettingsActivity.getRootMode(getActivity());
+
+        if (state.action == ACTION_BROWSE) {
+            mList.setOnItemLongClickListener(mItemLongClickListener);
+        } else {
+            mList.setOnItemLongClickListener(null);
+            mList.setLongClickable(false);
+        }
+
+        getLoaderManager().restartLoader(2, null, mCallbacks);
     }
 
     public void onDisplayStateChanged() {
@@ -155,16 +178,26 @@ public class RootsFragment extends Fragment {
     }
 
     public void onCurrentRootChanged() {
-        if (mAdapter == null) return;
+        if (mAdapter == null || mList == null) return;
 
         final RootInfo root = ((BaseActivity) getActivity()).getCurrentRoot();
-        for (int i = 0; i < mAdapter.getCount(); i++) {
-            final Object item = mAdapter.getItem(i);
-            if (item instanceof RootItem) {
-                final RootInfo testRoot = ((RootItem) item).root;
-                if (Objects.equals(testRoot, root)) {
-                    mList.setItemChecked(i, true);
-                    return;
+        for (int i = 0; i < mAdapter.getGroupCount(); i++) {
+            for (int j = 0; j < mAdapter.getChildrenCount(i); j++) {
+                final Object item = mAdapter.getChild(i,j);
+                if (item instanceof RootItem) {
+                    final RootInfo testRoot = ((RootItem) item).root;
+                    if (Objects.equals(testRoot, root)) {
+                        try {
+                            long id = ExpandableListView.getPackedPositionForChild(i, j);
+                            int index = mList.getFlatListPosition(id);
+                            //mList.setSelection(index);
+                            mList.setItemChecked(index, true);
+                        } catch (Exception e){
+                            CrashReportingManager.logException(e);
+                        }
+
+                        return;
+                    }
                 }
             }
         }
@@ -177,36 +210,102 @@ public class RootsFragment extends Fragment {
         startActivity(intent);
     }
 
-    private OnItemClickListener mItemListener = new OnItemClickListener() {
+
+    private ExpandableListView.OnChildClickListener mItemListener = new ExpandableListView.OnChildClickListener() {
         @Override
-        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-            Item item = mAdapter.getItem(position);
+        public boolean onChildClick(ExpandableListView parent, View view, int groupPosition,
+                                    int childPosition, long id) {
+            final BaseActivity activity = BaseActivity.get(RootsFragment.this);
+            final Item item = (Item) mAdapter.getChild(groupPosition, childPosition);
             if (item instanceof RootItem) {
-                BaseActivity activity = BaseActivity.get(RootsFragment.this);
-                activity.onRootPicked(((RootItem) item).root, false);
+                int index = parent.getFlatListPosition(ExpandableListView.getPackedPositionForChild(groupPosition, childPosition));
+                parent.setItemChecked(index, true);
+                activity.onRootPicked(((RootItem) item).root, true);
+                Bundle params = new Bundle();
+                params.putString("type", ((RootItem) item).root.title);
+                AnalyticsManager.logEvent("navigate", ((RootItem) item).root, params);
             } else if (item instanceof AppItem) {
-                DocumentsActivity activity = DocumentsActivity.get(RootsFragment.this);
                 activity.onAppPicked(((AppItem) item).info);
             } else {
                 throw new IllegalStateException("Unknown root: " + item);
             }
+            return false;
         }
     };
 
-    private OnItemLongClickListener mItemLongClickListener = new OnItemLongClickListener() {
+
+    private AdapterView.OnItemLongClickListener mItemLongClickListener = new AdapterView.OnItemLongClickListener() {
         @Override
         public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-            final Item item = mAdapter.getItem(position);
-            if (item instanceof AppItem) {
-                showAppDetails(((AppItem) item).info);
-                return true;
+            int itemType = ExpandableListView.getPackedPositionType(id);
+            int childPosition;
+            int groupPosition;
+
+            if ( itemType == ExpandableListView.PACKED_POSITION_TYPE_CHILD) {
+                childPosition = ExpandableListView.getPackedPositionChild(id);
+                groupPosition = ExpandableListView.getPackedPositionGroup(id);
+                final Item item = (Item) mAdapter.getChild(groupPosition, childPosition);
+                if (item instanceof AppItem) {
+                    showAppDetails(((AppItem) item).info);
+                    return true;
+                } else if (item instanceof BookmarkItem) {
+                    removeBookark((BookmarkItem)item);
+                    return true;
+                }  else {
+                    return false;
+                }
+
+            } else if(itemType == ExpandableListView.PACKED_POSITION_TYPE_GROUP) {
+                groupPosition = ExpandableListView.getPackedPositionGroup(id);
+                return false;
+
             } else {
                 return false;
             }
         }
     };
 
-    private static abstract class Item {
+    private ExpandableListView.OnGroupExpandListener mOnGroupExpandListener = new ExpandableListView.OnGroupExpandListener() {
+        @Override
+        public void onGroupExpand(int i) {
+            expandedIds.add(mAdapter.getGroupId(i));
+        }
+    };
+
+    private ExpandableListView.OnGroupCollapseListener mOnGroupCollapseListener = new ExpandableListView.OnGroupCollapseListener() {
+        @Override
+        public void onGroupCollapse(int i) {
+            expandedIds.remove(mAdapter.getGroupId(i));
+        }
+    };
+
+    private void removeBookark(final BookmarkItem item) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        builder.setMessage("Remove bookmark?")
+                .setCancelable(false)
+                .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int did) {
+                        dialog.dismiss();
+                        int rows = getActivity().getContentResolver().delete(ExplorerProvider.buildBookmark(),
+                                ExplorerProvider.BookmarkColumns.PATH + " = ? AND " +
+                                        ExplorerProvider.BookmarkColumns.TITLE + " = ? ",
+                                new String[]{item.root.path, item.root.title}
+                        );
+                        if (rows > 0) {
+                            ((BaseActivity) getActivity()).showInfo("Bookmark removed");
+
+                            RootsCache.updateRoots(getActivity(), ExternalStorageProvider.AUTHORITY);
+                        }
+                    }
+                }).setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int did) {
+                dialog.dismiss();
+            }
+        });
+        DialogFragment.showThemedDialog(builder);
+    }
+
+    public static abstract class Item {
         private final int mLayoutId;
 
         public Item(int layoutId) {
@@ -225,12 +324,21 @@ public class RootsFragment extends Fragment {
         public abstract void bindView(View convertView);
     }
 
-    private static class RootItem extends Item {
+    public static class RootItem extends Item {
         public final RootInfo root;
+
+        private final int color;
 
         public RootItem(RootInfo root) {
             super(R.layout.item_root);
             this.root = root;
+            this.color = SettingsActivity.getPrimaryColor();
+        }
+
+        public RootItem(RootInfo root, int color) {
+            super(R.layout.item_root);
+            this.root = root;
+            this.color = color;
         }
 
         @Override
@@ -255,7 +363,7 @@ public class RootsFragment extends Fragment {
         }
     }
 
-    private static class SpacerItem extends Item {
+    public static class SpacerItem extends Item {
         public SpacerItem() {
             super(R.layout.item_root_spacer);
         }
@@ -266,7 +374,7 @@ public class RootsFragment extends Fragment {
         }
     }
 
-    private static class AppItem extends Item {
+    public static class AppItem extends Item {
         public final ResolveInfo info;
 
         public AppItem(ResolveInfo info) {
@@ -289,110 +397,37 @@ public class RootsFragment extends Fragment {
         }
     }
 
-    private static class RootsAdapter extends ArrayAdapter<Item> {
-        public RootsAdapter(Context context, Collection<RootInfo> roots, Intent includeApps) {
-            super(context, 0);
+    public static class GroupItem {
+        public final String mLabel;
+        private final int mLayoutId;
 
-            RootItem recents = null;
-            RootItem images = null;
-            RootItem videos = null;
-            RootItem audio = null;
-            RootItem downloads = null;
-
-            final List<RootInfo> clouds = Lists.newArrayList();
-            final List<RootInfo> locals = Lists.newArrayList();
-
-            for (RootInfo root : roots) {
-                if (root.isRecents()) {
-                    recents = new RootItem(root);
-                } else if (root.isExternalStorage()) {
-                    locals.add(root);
-                } else if (root.isDownloads()) {
-                    downloads = new RootItem(root);
-                } else if (root.isImages()) {
-                    images = new RootItem(root);
-                } else if (root.isVideos()) {
-                    videos = new RootItem(root);
-                } else if (root.isAudio()) {
-                    audio = new RootItem(root);
-                } else {
-                    clouds.add(root);
-                }
-            }
-
-            final RootComparator comp = new RootComparator();
-            Collections.sort(clouds, comp);
-            Collections.sort(locals, comp);
-
-            if (recents != null) add(recents);
-
-            for (RootInfo cloud : clouds) {
-                add(new RootItem(cloud));
-            }
-
-            if (images != null) add(images);
-            if (videos != null) add(videos);
-            if (audio != null) add(audio);
-            if (downloads != null) add(downloads);
-
-            for (RootInfo local : locals) {
-                add(new RootItem(local));
-            }
-
-            if (includeApps != null) {
-                final PackageManager pm = context.getPackageManager();
-                final List<ResolveInfo> infos = pm.queryIntentActivities(
-                        includeApps, PackageManager.MATCH_DEFAULT_ONLY);
-
-                final List<AppItem> apps = Lists.newArrayList();
-
-                // Omit ourselves from the list
-                for (ResolveInfo info : infos) {
-                    if (!context.getPackageName().equals(info.activityInfo.packageName)) {
-                        apps.add(new AppItem(info));
-                    }
-                }
-
-                if (apps.size() > 0) {
-                    add(new SpacerItem());
-                    for (Item item : apps) {
-                        add(item);
-                    }
-                }
-            }
+        public GroupItem(GroupInfo groupInfo) {
+            mLabel = groupInfo.label;
+            mLayoutId = R.layout.item_root_header;
         }
 
-        @Override
-        public View getView(int position, View convertView, ViewGroup parent) {
-            final Item item = getItem(position);
-            return item.getView(convertView, parent);
-        }
-
-        @Override
-        public boolean areAllItemsEnabled() {
-            return false;
-        }
-
-        @Override
-        public boolean isEnabled(int position) {
-            return getItemViewType(position) != 1;
-        }
-
-        @Override
-        public int getItemViewType(int position) {
-            final Item item = getItem(position);
-            if (item instanceof RootItem || item instanceof AppItem) {
-                return 0;
-            } else {
-                return 1;
+        public View getView(View convertView, ViewGroup parent) {
+            if (convertView == null) {
+                convertView = LayoutInflater.from(parent.getContext())
+                        .inflate(mLayoutId, parent, false);
             }
+            bindView(convertView);
+            return convertView;
         }
 
-        @Override
-        public int getViewTypeCount() {
-            return 2;
+        public void bindView(View convertView) {
+            final TextView title = (TextView) convertView.findViewById(android.R.id.title);
+            title.setText(mLabel);
+        }
+
+    }
+
+    public static class BookmarkItem extends RootItem {
+        public BookmarkItem(RootInfo root) {
+            super(root, 0);
         }
     }
+
 
     public static class RootComparator implements Comparator<RootInfo> {
         @Override

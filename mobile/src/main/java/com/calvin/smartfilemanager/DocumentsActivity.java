@@ -70,6 +70,7 @@ import com.calvin.smartfilemanager.provider.ExternalStorageProvider;
 import com.calvin.smartfilemanager.provider.RecentsProvider;
 import com.calvin.smartfilemanager.provider.RecentsProvider.RecentColumns;
 import com.calvin.smartfilemanager.provider.RecentsProvider.ResumeColumns;
+import com.calvin.smartfilemanager.setting.SettingsActivity;
 import com.calvin.smartfilemanager.widget.DirectoryContainerView;
 
 import java.util.ArrayList;
@@ -323,6 +324,7 @@ public class DocumentsActivity extends BaseActivity {
         state.forceAdvanced = intent.getBooleanExtra(DocumentsContract.EXTRA_SHOW_ADVANCED, false);
         state.showAdvanced = state.forceAdvanced
                 | LocalPreferences.getDisplayAdvancedDevices(this);
+        state.rootMode = SettingsActivity.getRootMode(this);
 
         if (state.action == ACTION_MANAGE || state.action == ACTION_BROWSE) {
             state.showSize = true;
@@ -388,6 +390,7 @@ public class DocumentsActivity extends BaseActivity {
         }
     }
 
+    @Override
     public void onAppPicked(ResolveInfo info) {
         final Intent intent = new Intent(getIntent());
         intent.setFlags(intent.getFlags() & ~Intent.FLAG_ACTIVITY_FORWARD_RESULT);
@@ -623,8 +626,18 @@ public class DocumentsActivity extends BaseActivity {
             onCurrentDirectoryChanged(ANIM_UP);
         } else if (size == 1 && !isRootsDrawerOpen()) {
             // TODO: open root drawer once we can capture back key
+            if(null != mParentRoot){
+                onRootPicked(mParentRoot, true);
+                mParentRoot = null;
+                return;
+            }
             super.onBackPressed();
         } else {
+            if(null != mParentRoot){
+                onRootPicked(mParentRoot, true);
+                mParentRoot = null;
+                return;
+            }
             super.onBackPressed();
         }
     }
@@ -694,10 +707,12 @@ public class DocumentsActivity extends BaseActivity {
 
 
 
+    private RootInfo mParentRoot;
+
     @Override
    public void onRootPicked(RootInfo root, RootInfo parentRoot) {
+        mParentRoot = parentRoot;
         onRootPicked(root, true);
-        setRootsDrawerOpen(false);
     }
 
     @Override
@@ -718,6 +733,10 @@ public class DocumentsActivity extends BaseActivity {
             onCurrentDirectoryChanged(ANIM_SIDE);
         } else {
             new PickRootTask(root).executeOnExecutor(getCurrentExecutor());
+        }
+
+        if(closeDrawer){
+            setRootsDrawerOpen(false);
         }
     }
 
@@ -961,4 +980,6 @@ public class DocumentsActivity extends BaseActivity {
     public void onPointerCaptureChanged(boolean hasCapture) {
 
     }
+
+
 }
