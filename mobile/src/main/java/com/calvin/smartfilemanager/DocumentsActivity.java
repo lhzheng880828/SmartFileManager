@@ -161,6 +161,7 @@ public class DocumentsActivity extends BaseActivity {
                 ? icicle.<State>getParcelable(EXTRA_STATE)
                 : buildDefaultState();
 
+
         mToolbar = (Toolbar) findViewById(R.id.toolbar);
         mToolbar.setTitleTextAppearance(context,
                 android.R.style.TextAppearance_DeviceDefault_Widget_ActionBar_Title);
@@ -192,7 +193,7 @@ public class DocumentsActivity extends BaseActivity {
                 mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
             }
         }
-
+        Log.d(TAG,"mState is "+mState.action);
         if (mState.action == ACTION_CREATE) {
             final String mimeType = getIntent().getType();
             final String title = getIntent().getStringExtra(Intent.EXTRA_TITLE);
@@ -202,7 +203,8 @@ public class DocumentsActivity extends BaseActivity {
             PickFragment.show(getFragmentManager());
         }
 
-        if (mState.action == ACTION_GET_CONTENT) {
+        if (mState.action == ACTION_GET_CONTENT ||
+                mState.action == ACTION_BROWSE) {
             final Intent moreApps = new Intent(getIntent());
             moreApps.setComponent(null);
             moreApps.setPackage(null);

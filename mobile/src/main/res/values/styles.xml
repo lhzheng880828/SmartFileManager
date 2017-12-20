@@ -112,6 +112,11 @@
         <item name="android:windowBackground">@drawable/splash_background</item>
     </style>
 
+    <style name="Theme.Document" parent="@style/DocumentsTheme">
+        <item name="windowNoTitle">true</item>
+        <item name="android:windowContentOverlay">@null</item>
+    </style>
+
     <style name="ButtonAppTheme" parent="@style/Widget.AppCompat.Button.Borderless.Colored">
         <item name="android:gravity">center_vertical</item>
         <item name="android:minHeight">48dp</item>

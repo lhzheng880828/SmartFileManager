@@ -28,6 +28,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.util.Log;
@@ -837,6 +838,23 @@ public abstract class BaseActivity extends ActionBarActivity {
                 });
             } else {
                 ActivityCompat.requestPermissions(this, storagePermissions, REQUEST_STORAGE);
+            }
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        switch (requestCode) {
+            case REQUEST_STORAGE: {
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    again();
+                } else {
+                    Utils.showRetrySnackBar(this, "Permission grating failed", null);
+                    requestStoragePermissions();
+                }
+                return;
             }
         }
     }
