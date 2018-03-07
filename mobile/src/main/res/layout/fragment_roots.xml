@@ -13,7 +13,7 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-
+<!--android:groupIndicator="@drawable/expander_group"-->
 <ExpandableListView xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@android:id/list"
     android:layout_width="match_parent"

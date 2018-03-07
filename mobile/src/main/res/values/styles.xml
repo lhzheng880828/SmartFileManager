@@ -20,13 +20,11 @@
     <style name="TextAppearance.Medium">
         <item name="android:textAppearance">?android:attr/textAppearanceMedium</item>
         <item name="android:textColor">?android:attr/textColorSecondary</item> 
-        <item name="android:textSize">40sp</item>
     </style>
 
     <style name="TextAppearance.Small">
         <item name="android:textAppearance">?android:attr/textAppearanceSmall</item>
         <item name="android:textColor">?android:attr/textColorTertiary</item> 
-         <item name="android:textSize">36sp</item>
     </style>
 
     <!-- Normally just a redirection, but this is used to make ourselves a

@@ -32,6 +32,7 @@ import android.provider.Settings;
 import android.support.v7.app.AlertDialog;
 import android.text.TextUtils;
 import android.text.format.Formatter;
+import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -51,6 +52,7 @@ import com.calvin.smartfilemanager.loader.RootsLoader;
 import com.calvin.smartfilemanager.misc.AnalyticsManager;
 import com.calvin.smartfilemanager.misc.CrashReportingManager;
 import com.calvin.smartfilemanager.misc.RootsCache;
+import com.calvin.smartfilemanager.misc.Utils;
 import com.calvin.smartfilemanager.model.DocumentInfo;
 import com.calvin.smartfilemanager.model.GroupInfo;
 import com.calvin.smartfilemanager.model.RootInfo;
@@ -105,7 +107,22 @@ public class RootsFragment extends Fragment {
         mList = (ExpandableListView) view.findViewById(android.R.id.list);
         mList.setOnChildClickListener(mItemListener);
         mList.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
+        DisplayMetrics metrics = new DisplayMetrics();
+        getActivity().getWindowManager().getDefaultDisplay().getMetrics(metrics);
+        int width = Utils.dpToPx(302);
 
+        boolean rtl = Utils.isRTL();
+        int leftPadding = rtl ? 10 : 50;
+        int rightPadding = rtl ? 50 : 10;
+        int leftWidth = width - Utils.dpToPx(leftPadding);
+        int rightWidth = width - Utils.dpToPx(rightPadding);
+
+        if(Utils.hasJellyBeanMR2()){
+            mList.setIndicatorBoundsRelative(leftWidth, rightWidth);
+
+        } else {
+            mList.setIndicatorBounds(leftWidth, rightWidth);
+        }
         return view;
     }
 
