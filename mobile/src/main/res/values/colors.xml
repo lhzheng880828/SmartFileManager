@@ -70,4 +70,8 @@
 
     <color name="defaultThemeColor">#808080</color>
 
+
+    <color name="Indigo_colorPrimaryDark">#303f9f</color>
+    <color name="Indigo_colorPrimary">#3f51b5</color>
+    <color name="Indigo_nav_color">#4675FF</color>
 </resources>

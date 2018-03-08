@@ -491,8 +491,12 @@ public class DocumentsActivity extends BaseActivity {
 
         if (!mShowAsDialog /*&& mDrawerLayout.getDrawerLockMode(mRootsDrawer) ==
                 DrawerLayout.LOCK_MODE_UNLOCKED*/) {
-
-            mToolbar.setNavigationIcon(R.drawable.ic_drawer_glyph);
+            getSupportActionBar().setHomeButtonEnabled(true); //设置返回键可用
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            getSupportActionBar().setDisplayShowHomeEnabled(true);
+            if (mDrawerToggle != null) {
+                mDrawerToggle.setDrawerIndicatorEnabled(false);
+            }
             mToolbar.setNavigationContentDescription(R.string.drawer_open);
             mToolbar.setNavigationOnClickListener(new View.OnClickListener() {
                 @Override
