@@ -26,12 +26,15 @@ import android.content.pm.ResolveInfo;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
+import android.text.TextUtils;
 import android.util.Log;
 import android.util.SparseArray;
 import android.view.LayoutInflater;
@@ -62,6 +65,7 @@ import com.calvin.smartfilemanager.model.DocumentsContract;
 import com.calvin.smartfilemanager.model.DocumentsContract.Root;
 import com.calvin.smartfilemanager.model.DurableUtils;
 import com.calvin.smartfilemanager.model.RootInfo;
+import com.calvin.smartfilemanager.provider.ExternalStorageProvider;
 import com.calvin.smartfilemanager.provider.RecentsProvider;
 import com.calvin.smartfilemanager.provider.RecentsProvider.ResumeColumns;
 import com.calvin.smartfilemanager.setting.SettingsActivity;
@@ -196,7 +200,7 @@ public abstract class BaseActivity extends ActionBarActivity {
             onBackPressed();
             return true;
         } else if (id == R.id.menu_create_dir) {
-            CreateDirectoryFragment.show(getFragmentManager());
+            CreateDirectoryFragment.show(getSupportFragmentManager());
             return true;
         } else if (id == R.id.menu_search) {
             return false;
@@ -238,7 +242,7 @@ public abstract class BaseActivity extends ActionBarActivity {
      * the (abstract) directoryChanged method will be called.
      * @param anim
      */
-    final void onCurrentDirectoryChanged(int anim) {
+     void onCurrentDirectoryChanged(int anim) {
         onDirectoryChanged(anim);
 
         final RootsFragment roots = RootsFragment.get(getFragmentManager());
@@ -878,5 +882,30 @@ public abstract class BaseActivity extends ActionBarActivity {
             }
         });
         snackbar.setActionTextColor(SettingsActivity.getAccentColor()).show();
+    }
+
+    public void showError(int msg){
+        showToast(msg, ContextCompat.getColor(this, R.color.button_text_color_red), Snackbar.LENGTH_SHORT);
+    }
+
+    public void showToast(int msg, int actionColor, int duration){
+        final Snackbar snackbar = Snackbar.make(findViewById(R.id.content_view), msg, duration);
+        snackbar.setAction(android.R.string.ok, new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                snackbar.dismiss();
+            }
+        })
+                .setActionTextColor(actionColor).show();
+    }
+
+    public boolean isSAFIssue(String docId){
+        boolean isSAFIssue = Build.VERSION.SDK_INT == Build.VERSION_CODES.KITKAT
+                && !TextUtils.isEmpty(docId) && docId.startsWith(ExternalStorageProvider.ROOT_ID_SECONDARY);
+
+        if(isSAFIssue){
+            showError(R.string.saf_issue);
+        }
+        return isSAFIssue;
     }
 }

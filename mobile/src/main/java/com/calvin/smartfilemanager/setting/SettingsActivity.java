@@ -20,6 +20,8 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
     public static final String KEY_FILE_HIDDEN = "fileHidden";
     public static final String KEY_ADVANCED_DEVICES = "advancedDevices";
     public static final String KEY_ROOT_MODE = "rootMode";
+    public static final String KEY_FOLDER_ANIMATIONS = "folderAnimations";
+
 
 
     @Override
@@ -60,5 +62,10 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
     public static boolean getRootMode(Context context) {
         return PreferenceManager.getDefaultSharedPreferences(context)
                 .getBoolean(KEY_ROOT_MODE, true);
+    }
+
+    public static boolean getFolderAnimation(Context context) {
+        return PreferenceManager.getDefaultSharedPreferences(context)
+                .getBoolean(KEY_FOLDER_ANIMATIONS, false);
     }
 }

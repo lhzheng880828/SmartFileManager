@@ -30,6 +30,7 @@ import android.util.TypedValue;
 
 import com.calvin.smartfilemanager.DocumentsActivity;
 import com.calvin.smartfilemanager.R;
+import com.calvin.smartfilemanager.network.NetworkConnection;
 
 import java.util.HashMap;
 
@@ -360,5 +361,16 @@ public class IconUtils {
         }
 
         return "file";
+    }
+
+    public static Drawable loadSchemeIcon(Context context, String type) {
+
+        if (NetworkConnection.SERVER.equals(type)) {
+            return ContextCompat.getDrawable(context, R.drawable.ic_connection_server);
+        } else if (NetworkConnection.CLIENT.equals(type)) {
+            return ContextCompat.getDrawable(context, R.drawable.ic_connection_network);
+        } else {
+            return ContextCompat.getDrawable(context, R.drawable.ic_connection_server);
+        }
     }
 }

@@ -21,6 +21,7 @@ import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -30,6 +31,8 @@ import com.calvin.smartfilemanager.BaseActivity;
 import com.calvin.smartfilemanager.DocumentsActivity;
 import com.calvin.smartfilemanager.R;
 import com.calvin.smartfilemanager.model.DocumentInfo;
+
+import java.util.Locale;
 
 /**
  * Display pick confirmation bar, usually for selecting a directory.
@@ -128,6 +131,21 @@ public class PickFragment extends Fragment {
             mContainer.setVisibility(View.VISIBLE);
         } else {
             mContainer.setVisibility(View.GONE);
+        }
+    }
+
+    public void setPickTarget(DocumentInfo pickTarget, CharSequence displayName) {
+        mPickTarget = pickTarget;
+
+        if (mContainer != null) {
+            if (mPickTarget != null) {
+                mContainer.setVisibility(View.VISIBLE);
+                final Locale locale = getResources().getConfiguration().locale;
+                final String raw = getString(R.string.menu_select).toUpperCase(locale);
+                mPick.setText(TextUtils.expandTemplate(raw, displayName));
+            } else {
+                mContainer.setVisibility(View.GONE);
+            }
         }
     }
 }

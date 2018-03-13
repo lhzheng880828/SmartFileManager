@@ -51,6 +51,7 @@ import com.calvin.smartfilemanager.adapter.RootsExpandableAdapter;
 import com.calvin.smartfilemanager.loader.RootsLoader;
 import com.calvin.smartfilemanager.misc.AnalyticsManager;
 import com.calvin.smartfilemanager.misc.CrashReportingManager;
+import com.calvin.smartfilemanager.misc.LogUtils;
 import com.calvin.smartfilemanager.misc.RootsCache;
 import com.calvin.smartfilemanager.misc.Utils;
 import com.calvin.smartfilemanager.model.DocumentInfo;
@@ -71,6 +72,8 @@ import static com.calvin.smartfilemanager.BaseActivity.State.ACTION_BROWSE;
  * Display list of known storage backend roots.
  */
 public class RootsFragment extends Fragment {
+
+    private static final String TAG = RootsFragment.class.getSimpleName();
 
     private int group_size = 0;
     private ArrayList<Long> expandedIds = new ArrayList<>();
@@ -237,6 +240,7 @@ public class RootsFragment extends Fragment {
             if (item instanceof RootItem) {
                 int index = parent.getFlatListPosition(ExpandableListView.getPackedPositionForChild(groupPosition, childPosition));
                 parent.setItemChecked(index, true);
+                LogUtils.LOGI(TAG,"");
                 activity.onRootPicked(((RootItem) item).root, true);
                 Bundle params = new Bundle();
                 params.putString("type", ((RootItem) item).root.title);

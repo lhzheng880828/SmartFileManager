@@ -164,8 +164,8 @@ public class DirectoryFragment extends Fragment {
         show(fm, TYPE_NORMAL, root, doc, null, anim);
     }
 
-    public static void showSearch(FragmentManager fm, RootInfo root, String query, int anim) {
-        show(fm, TYPE_SEARCH, root, null, query, anim);
+    public static void showSearch(FragmentManager fm, RootInfo root,DocumentInfo cwd, String query, int anim) {
+        show(fm, TYPE_SEARCH, root, cwd, query, anim);
     }
 
     public static void showRecentsOpen(FragmentManager fm, int anim) {

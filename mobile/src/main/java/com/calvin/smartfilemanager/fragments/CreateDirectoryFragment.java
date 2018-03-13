@@ -18,8 +18,7 @@ package com.calvin.smartfilemanager.fragments;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
-import android.app.DialogFragment;
-import android.app.FragmentManager;
+import android.support.v4.app.FragmentManager;
 import android.content.ContentProviderClient;
 import android.content.ContentResolver;
 import android.content.Context;

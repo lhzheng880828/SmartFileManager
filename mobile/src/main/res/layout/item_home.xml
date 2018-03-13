@@ -60,7 +60,7 @@
                 android:textAppearance="@style/TextAppearance.AppCompat.Body1"
                 android:textColor="?android:attr/textColorPrimary" />
 
-            <dev.dworks.apps.anexplorer.ui.NumberProgressBar
+            <com.calvin.smartfilemanager.widget.NumberProgressBar
                 android:id="@android:id/progress"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
